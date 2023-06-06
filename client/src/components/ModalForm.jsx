@@ -1,7 +1,21 @@
 /** @format */
 import { Modal, Button, Form, NavLink } from "react-bootstrap";
+import { Navigate } from "react-router-dom";
 
 export const ModalForm = (props) => {
+  let form = {
+    name: "",
+    gender: "",
+    phone: "",
+  };
+
+  const handleForm = () => {
+    let forms = JSON.parse(localStorage.getItem("forms")) || [];
+    forms.push(form);
+    localStorage.setItem("forms", JSON.stringify(forms));
+    props.onHide(true);
+  };
+
   return (
     <>
       <Modal
@@ -34,7 +48,7 @@ export const ModalForm = (props) => {
                 name="fullname"
                 // value={email}
                 type="text"
-                // onChange={(e) => (user.fullname = e.target.value)}
+                onChange={(e) => (form.name = e.target.value)}
               />
               <Form.Label className="fw-bold">Gender</Form.Label>
               <Form.Control
@@ -43,7 +57,7 @@ export const ModalForm = (props) => {
                 name="gender"
                 // value={email}
                 type="text"
-                // onChange={(e) => (user.email = e.target.value)}
+                onChange={(e) => (form.gender = e.target.value)}
               />
               <Form.Label className="fw-bold">Phone</Form.Label>
 
@@ -52,7 +66,7 @@ export const ModalForm = (props) => {
                 // onChange={OnChangeHandler}
                 name="phone"
                 // value={password}
-                // onChange={(e) => (user.password = e.target.value)}
+                onChange={(e) => (form.phone = e.target.value)}
               />
             </Form.Group>
             <NavLink href="/Payment">
@@ -64,6 +78,7 @@ export const ModalForm = (props) => {
                   padding: "10px 40px",
                   marginBottom: "30px",
                 }}
+                onClick={handleForm}
               >
                 BOOK NOW
               </Button>

@@ -2,7 +2,7 @@
 
 import { Container, Form, Button } from "react-bootstrap";
 import { useState, useEffect } from "react";
-import { useMutation } from "react-query";
+import { useMutation, useQu } from "react-query";
 import { API } from "../config/api";
 import { useNavigate } from "react-router-dom";
 import Navbars from "../components/Navbar";
@@ -317,10 +317,10 @@ function AddTrip() {
                   </div>
                 </div>
               </Form.Label>
-              <div style={{ width: "100px" }}>
-                <img src={imageUrl} alt="preview" style={{ width: "100%" }} />
-              </div>
             </Form.Group>
+            <div style={{ width: "100px" }}>
+              <img src={imageUrl} alt="preview" style={{ width: "100%" }} />
+            </div>
             <div className="justify-content-center d-flex">
               <Button
                 style={{

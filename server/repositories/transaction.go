@@ -25,12 +25,12 @@ func (r *repository) FindTransaction() ([]models.Transaction, error) {
 }
 func (r *repository) GetTransaction(ID int) (models.Transaction, error) {
 	var transaction models.Transaction
-	err := r.db.Preload("Trip.Country").First(&transaction).Error
+	err := r.db.Preload("Trip.Country").Preload("User").First(&transaction, ID).Error
 
 	return transaction, err
 }
 func (r *repository) CreateTransaction(transaction models.Transaction) (models.Transaction, error) {
-	err := r.db.Create(&transaction).Error
+	err := r.db.Preload("Trip").Preload("Coutry").Create(&transaction).Error
 
 	return transaction, err
 }

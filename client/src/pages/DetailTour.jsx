@@ -2,21 +2,27 @@
 import Navbars from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Button } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Carousel from "react-multi-carousel";
+import { API } from "../config/api";
 import ModalForm from "../components/ModalForm";
 import "react-multi-carousel/lib/styles.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "react-query";
 
-function Detail() {
+const Detail = ({ setDataTrans }) => {
   document.title = "Detail | DeweTour";
-  const params = useParams();
-  const [count, setCount] = useState(0);
-  const [total, setTotal] = useState(false);
+
+  let { id } = useParams();
+  // console.log(id);
+
+  let { data: Trip } = useQuery("tripCache", async () => {
+    const response = await API.get(`/trip/${id}`);
+    return response.data.data;
+  });
+
+  const [count, setCount] = useState(1);
   const [showForm, setShowForm] = useState(false);
-  const id = parseInt(params.id);
-  const trips = JSON.parse(localStorage.getItem("getTrip"));
-  const detail = trips[id];
 
   const handleClose = () => {
     setShowForm(false);
@@ -27,37 +33,24 @@ function Detail() {
     setShowForm(true);
   };
 
-  // const incrementCart = async (id, orderQuantity) => {
-  //   const response = await API.patch(`/increase/${id}`);
-  //   setTotal({
-  //     id: id,
-  //     order_quantity: orderQuantity + 1,
-  //   });
-  // };
-
-  // const decrementCart = async (id, orderQuantity) => {
-  //   if (orderQuantity > 1) {
-  //     const response = await API.patch(`/decrease/${id}`);
-  //     setTotal({
-  //       id: id,
-  //       order_quantity: orderQuantity - 1,
-  //     });
-  //   }
-  // };
-
   const Add = () => {
     if (count === 10) return;
     setCount(count + 1);
   };
 
   const Less = () => {
-    if (count === 0) return;
+    if (count === 1) return;
     setCount(count - 1);
   };
 
-  // const Total = () => {
-  //   {count} * {detail.price}
-  // }
+  // const total = Trip ? Trip.price * count : 0;
+
+  useEffect(() => {
+    setDataTrans({
+      qty: count,
+      pay: Trip?.price * count,
+    });
+  }, [count]);
 
   const responsive = {
     superLargeDesktop: {
@@ -82,11 +75,11 @@ function Detail() {
     <>
       <Navbars />
       <div style={{ margin: "50px 130px" }}>
-        <h1 className="fw-bold m-0">{detail.title}</h1>
+        <h1 className="fw-bold m-0">{Trip?.title}</h1>
         <h4 style={{ color: "#A8A8A8", fontWeight: "bold" }}>
-          {detail.country}
+          {Trip?.country.name}
         </h4>
-        <img src={detail.Image} className="mb-2" alt="" width="100%" />
+        <img src={Trip?.image} className="mb-2" alt="" width="100%" />
         <Carousel responsive={responsive}>
           <div>
             <img src="/images/bekasi.png" alt="" />
@@ -107,21 +100,21 @@ function Detail() {
             <p style={{ color: "#A8A8A8" }}>Accommodation</p>
             <div className="d-flex gap-3">
               <img src="/images/hotel.svg" alt="" width="25px" height="25px" />
-              <h5 className="fw-bold">{detail.accomodation}</h5>
+              <h5 className="fw-bold">{Trip?.accomodation}</h5>
             </div>
           </div>
           <div>
             <p style={{ color: "#A8A8A8" }}>Transportation</p>
             <div className="d-flex gap-3">
               <img src="/images/plane.svg" alt="" width="25px" height="25px" />
-              <h5 className="fw-bold">{detail.transport}</h5>
+              <h5 className="fw-bold">{Trip?.transportation}</h5>
             </div>
           </div>
           <div>
             <p style={{ color: "#A8A8A8" }}>Eat</p>
             <div className="d-flex gap-3">
               <img src="/images/meal.svg" alt="" width="25px" height="25px" />
-              <h5 className="fw-bold">{detail.eat}</h5>
+              <h5 className="fw-bold">{Trip?.eat}</h5>
             </div>
           </div>
           <div>
@@ -129,7 +122,7 @@ function Detail() {
             <div className="d-flex gap-3">
               <img src="/images/time.svg" alt="" width="25px" height="25px" />
               <h5 className="fw-bold">
-                {detail.day} Day {detail.night} Night
+                {Trip?.day} Day {Trip?.night} Night
               </h5>
             </div>
           </div>
@@ -142,16 +135,16 @@ function Detail() {
                 width="25px"
                 height="25px"
               />
-              <h5 className="fw-bold">{detail.date}</h5>
+              <h5 className="fw-bold">{Trip?.date_trip}</h5>
             </div>
           </div>
         </div>
         <h4 className="fw-bold mt-5">Description</h4>
-        <p style={{ color: "#A8A8A8" }}>{detail.desc}</p>
+        <p style={{ color: "#A8A8A8" }}>{Trip?.description}</p>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div className="d-flex gap-2">
             <h2 style={{ color: "#FFAF00", fontWeight: "bold" }}>
-              IDR. {detail.price}
+              IDR. {Trip?.price}
             </h2>
             <h2 className="fw-bold"> / Person</h2>
           </div>
@@ -176,10 +169,10 @@ function Detail() {
         <div className="d-flex justify-content-between my-5">
           <h2 className="fw-bold">Total :</h2>
           <h2 style={{ color: "#FFAF00", fontWeight: "bold" }}>
-            IDR. 12,000,000
+            IDR. {count * Trip?.price}
           </h2>
         </div>
-        <div className="d-flex justify-content-end">
+        <div className="d-flex justify-content-end gap-5">
           <Button
             onClick={handleShowForm}
             style={{
@@ -189,13 +182,25 @@ function Detail() {
               padding: "10px 40px",
             }}
           >
-            BOOK NOW
+            ISI FORM
           </Button>
+          <Link to={`/Payment/${id}`}>
+            <Button
+              style={{
+                backgroundColor: "#FFAF00",
+                fontWeight: "bold",
+                border: "none",
+                padding: "10px 40px",
+              }}
+            >
+              BOOK NOW
+            </Button>
+          </Link>
         </div>
       </div>
       <ModalForm show={showForm} onHide={handleClose} />
       <Footer />
     </>
   );
-}
+};
 export default Detail;

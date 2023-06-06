@@ -14,8 +14,8 @@ func TripRoutes(r *gin.RouterGroup) {
 	CountryRepository := repositories.RepositoryCountry(mysql.DB)
 	h := handlers.HandlerTrip(TripRepository, CountryRepository)
 
-	r.GET("/trips", middleware.Auth(h.FindTrips))
-	r.GET("/trip/:id", middleware.Auth(h.GetTrip))
+	r.GET("/trips", h.FindTrips)
+	r.GET("/trip/:id", h.GetTrip)
 	r.POST("/trip", middleware.Auth(middleware.UploadFile(h.CreateTrip)))
 	r.PATCH("/trip/:id", middleware.Auth(middleware.UploadFile(h.UpdateTrip)))
 	r.DELETE("/trip/:id", middleware.Auth(h.DeleteTrip))

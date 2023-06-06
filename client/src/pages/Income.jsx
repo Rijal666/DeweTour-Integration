@@ -5,9 +5,19 @@ import Footer from "../components/Footer";
 import { Container, Table } from "react-bootstrap";
 import { ModalApprove } from "../components/ModalApprove";
 import { useState } from "react";
+import { useQuery } from "react-query";
+import { API } from "../config/api";
 
 function Income() {
   document.title = "Income | DeweTour";
+
+  const { data: transactions } = useQuery("transactionChace", async () => {
+    const res = await API.get("/transactions");
+    return res.data.data;
+  });
+
+  console.log(transactions, "ini asuuu");
+
   const [showApprove, setShowApprove] = useState(false);
 
   const handleClose = () => {
@@ -31,64 +41,26 @@ function Income() {
                 <th>No</th>
                 <th>Users</th>
                 <th>Trip</th>
-                <th>Bukti Transfer</th>
                 <th>Status Payment</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>1</td>
-                <td>Farhan kebab</td>
-                <td>Bekasi</td>
-                <td>bca.jpg</td>
-                <td>Pending</td>
-                <td>
-                  <span onClick={handleShowApprove}>
-                    <img src="/images/alat.svg" alt="" />
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td>Farhan kebab</td>
-                <td>Bekasi</td>
-                <td>bca.jpg</td>
-                <td>Pending</td>
-                <td>
-                  <img src="/images/alat.svg" alt="" />
-                </td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td>Farhan kebab</td>
-                <td>Bekasi</td>
-                <td>bca.jpg</td>
-                <td>Pending</td>
-                <td>
-                  <img src="/images/alat.svg" alt="" />
-                </td>
-              </tr>
-              <tr>
-                <td>4</td>
-                <td>Farhan kebab</td>
-                <td>Bekasi</td>
-                <td>bca.jpg</td>
-                <td>Pending</td>
-                <td>
-                  <img src="/images/alat.svg" alt="" />
-                </td>
-              </tr>
-              <tr>
-                <td>5</td>
-                <td>Farhan kebab</td>
-                <td>Bekasi</td>
-                <td>bca.jpg</td>
-                <td>Pending</td>
-                <td>
-                  <img src="/images/alat.svg" alt="" />
-                </td>
-              </tr>
+              {transactions?.map((item, index) => {
+                return (
+                  <tr>
+                    <td>{item.id}</td>
+                    <td>{item.user.fullname}</td>
+                    <td>{item.trip.country.name}</td>
+                    <td>{item.status}</td>
+                    <td>
+                      <span onClick={handleShowApprove}>
+                        <img src="/images/alat.svg" alt="" />
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </Table>
         </div>

@@ -16,7 +16,7 @@ func TransactionRoutes(r *gin.RouterGroup) {
 	h := handlers.NewHandleTransaction(TransactionRepository, TripRepository, UserRepository)
 
 	r.GET("/transactions", middleware.Auth(h.FindTransaction))
-	r.GET("/transaction/:id", middleware.Auth(h.GetTransaction))
+	r.GET("/transaction", middleware.Auth(h.GetTransaction))
 	r.POST("/transaction", middleware.Auth(h.CreateTransaction))
 	r.DELETE("/transaction/:id", middleware.Auth(h.DeleteTransaction))
 }

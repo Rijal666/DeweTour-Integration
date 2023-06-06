@@ -10,9 +10,8 @@ type TransactionResponse struct {
 	CounterQty int    `json:"counter_qty"`
 	Total      int    `json:"total"`
 	Status     string `json:"status"`
-	Attachment string `json:"attachment"`
 	TripID     int    `json:"trip_id"`
-	Trip       []models.TripResponse `json:"trip"`
+	Trip       models.TripResponse `json:"trip"`
 	UserID     int `json:"user_id"`
 	User models.UsersProfileResponse `json:"user"`
 }

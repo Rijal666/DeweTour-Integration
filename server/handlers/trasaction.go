@@ -25,15 +25,15 @@ func NewHandleTransaction(TransactionRepository repositories.TransactionReposito
 }
 
 func (h *HandleTransaction) GetTransaction(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	userLogin := c.MustGet("userLogin")
+	userId,_ := userLogin.(jwt.MapClaims)["id"].(float64)
 
-	transaction, err := h.TransactionRepository.GetTransaction(id)
+	transaction, err := h.TransactionRepository.GetTransaction(int(userId))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, resultdto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
 		return
 	}
-	response := resultdto.SuccessResult{Status: http.StatusOK, Data: transaction}
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, resultdto.SuccessResult{Status: http.StatusOK, Message: "transaction ", Data: transaction})
 }
 
 func (h *HandleTransaction) CreateTransaction(c *gin.Context) {
@@ -43,7 +43,6 @@ func (h *HandleTransaction) CreateTransaction(c *gin.Context) {
 	// 	return
 	userLogin := c.MustGet("userLogin")
 	userId := userLogin.(jwt.MapClaims)["id"].(float64)
-	dataFile := c.GetString("dataFile")
 
 	counterqty, _ := strconv.Atoi(c.PostForm("counter_qty"))
 	total, _ := strconv.Atoi(c.PostForm("total"))
@@ -56,7 +55,6 @@ func (h *HandleTransaction) CreateTransaction(c *gin.Context) {
 		CounterQty: counterqty,
 		Total:      total,
 		Status:     c.PostForm("status"),
-		Attachment: dataFile,
 		TripID:     tripid,
 		UserID:     int(userId),
 	}
@@ -109,14 +107,15 @@ func (h *HandleTransaction) CreateTransaction(c *gin.Context) {
 // }
 
 func (h *HandleTransaction) FindTransaction(c *gin.Context) {
-	transaction, err := h.TransactionRepository.FindTransaction()
+
+	transactions, err := h.TransactionRepository.FindTransaction()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, resultdto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
 		return
 	}
 	
 
-	c.JSON(http.StatusOK, resultdto.SuccessResult{Status: http.StatusOK, Data: transaction})
+	c.JSON(http.StatusOK, resultdto.SuccessResult{Status: http.StatusOK, Data: transactions})
 }
 
 func (h *HandleTransaction) DeleteTransaction(c *gin.Context) {

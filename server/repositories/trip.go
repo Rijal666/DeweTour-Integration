@@ -27,7 +27,7 @@ func (r *repository) FindTrips() ([]models.Trip, error) {
 }
 func (r *repository) GetTrip(ID int) (models.Trip, error) {
 	var trip models.Trip
-	err := r.db.Preload("Country").First(&trip).Error
+	err := r.db.Preload("Country").First(&trip, ID).Error
 
 	return trip, err
 }

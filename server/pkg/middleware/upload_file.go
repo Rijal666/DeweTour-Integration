@@ -1,9 +1,11 @@
 package middleware
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,7 +37,10 @@ func UploadFile(next gin.HandlerFunc) gin.HandlerFunc {
 		}
 		data := tempFile.Name()
 
-		c.Set("dataFile", data)
+		update := strings.Split(data, "\\")[1]
+		fmt.Println(update)
+
+		c.Set("dataFile", update)
 		next(c)
 	}
 }

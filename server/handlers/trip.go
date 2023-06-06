@@ -14,7 +14,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-var path_file = "http://localhost:5000/"
+var path_file = "http://localhost:5000/uploads/"
 
 type handlerTrip struct {
 	TripRepository repositories.TripRepository
@@ -26,10 +26,7 @@ func HandlerTrip(TripRepository repositories.TripRepository, CountryRepository r
 }
 
 func(h *handlerTrip) FindTrips(c *gin.Context) {
-	UserLogin := c.MustGet("userLogin")
-	userAdmin := UserLogin.(jwt.MapClaims)["is_admin"].(bool)
 
-	if userAdmin {
 		trips, err := h.TripRepository.FindTrips()
 		
 		if err != nil {
@@ -48,18 +45,11 @@ func(h *handlerTrip) FindTrips(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, resultdto.ErrorResult{Status: http.StatusBadRequest, Message: "No record found"})
 			return
 		}
-	} else {
-		c.JSON(http.StatusUnauthorized, resultdto.ErrorResult{Status: http.StatusUnauthorized, Message: "Sorry, you're not Admin"})
-		return
-	}
 }
 
 func (h *handlerTrip) GetTrip(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	UserLogin := c.MustGet("userLogin")
-	userAdmin := UserLogin.(jwt.MapClaims)["is_admin"].(bool)
 
-	if userAdmin {
 		trip, err := h.TripRepository.GetTrip(id)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, resultdto.ErrorResult{
@@ -70,11 +60,6 @@ func (h *handlerTrip) GetTrip(c *gin.Context) {
 		trip.Image = path_file + trip.Image
 
 		c.JSON(http.StatusOK, resultdto.SuccessResult{Status: http.StatusOK, Message: "Trip data successfully obtained", Data: trip})
-
-	} else {
-		c.JSON(http.StatusUnauthorized, resultdto.ErrorResult{Status: http.StatusUnauthorized, Message: "Sorry, you're not Admin"})
-		return
-	}
 		
 }
 func (h *handlerTrip) CreateTrip(c *gin.Context) {
