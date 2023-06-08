@@ -7,13 +7,11 @@ import { UserContext } from "./context/userContext";
 import { useContext, useEffect, useState } from "react";
 import Income from "./pages/Income";
 import AddTrip from "./pages/AddTrip";
-import Payment from "./pages/Payment";
 import { setAuthToken, API } from "./config/api";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 function App() {
   const [state, dispatch] = useContext(UserContext);
-  const [dataTrans, setDataTrans] = useState();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -74,18 +72,11 @@ function App() {
       ) : (
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route
-            path="/Detail/:id"
-            element={<Detail setDataTrans={setDataTrans} />}
-          />
+          <Route path="/Detail/:id" element={<Detail />} />
           <Route path="/Profile" element={<Profile />} />
           <Route path="/AddTrip" element={<AddTrip />} />
           <Route path="/IncomeTrip" element={<IncomeTrip />} />
           <Route path="/Income" element={<Income />} />
-          <Route
-            path="/Payment/:id"
-            element={<Payment dataTrans={dataTrans} />}
-          />
         </Routes>
       )}
     </>

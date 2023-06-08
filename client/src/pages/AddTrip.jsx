@@ -307,6 +307,7 @@ function AddTrip() {
                   </div>
                   <div>
                     <Form.Control
+                      multiple
                       type="file"
                       name="image"
                       id="image"

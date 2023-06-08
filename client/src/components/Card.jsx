@@ -1,11 +1,20 @@
 /** @format */
 
 import Card from "react-bootstrap/Card";
-import { Container, NavLink } from "react-bootstrap";
+import { NavLink } from "react-bootstrap";
+import { useQuery } from "react-query";
+import { API } from "../config/api";
 
 const Cards = ({ data, search }) => {
-  console.log(data, "ini data ");
-  console.log(search, "ini search ");
+  console.log(data, "ini data kontol ");
+  // console.log(search, "ini search ");
+
+  const rupiah = (number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+    }).format(number);
+  };
   return (
     <>
       {data?.length !== 0 ? (
@@ -43,12 +52,17 @@ const Cards = ({ data, search }) => {
                   }}
                 >
                   <NavLink href={`/Detail/${trip?.id}`}>
-                    <Card.Img variant="top" src={trip?.image} />
+                    <Card.Img
+                      variant="top"
+                      src={trip?.image}
+                      width="100px"
+                      height="200px"
+                    />
                     <Card.Body>
                       <Card.Title>{trip?.title}</Card.Title>
-                      <div className="d-flex my-0">
+                      <div className="d-flex" style={{ marginBottom: "-20px" }}>
                         <Card.Text style={{ color: "#FFAF00" }}>
-                          {trip?.price}
+                          {rupiah(trip?.price)}
                         </Card.Text>
                         <Card.Text
                           className="ms-auto"

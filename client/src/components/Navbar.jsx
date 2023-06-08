@@ -7,6 +7,7 @@ import { API, setAuthToken } from "../config/api";
 import ModalLogin from "./ModalLogin";
 import ModalRegister from "./ModalRegister";
 import Swal from "sweetalert2";
+import ImgProfile from "../assets/image/myProfile.png";
 
 function Navbars() {
   let navigate = useNavigate();
@@ -147,7 +148,7 @@ function Navbars() {
                     <NavDropdown
                       title={
                         <img
-                          src="/images/blank-profile.png"
+                          src={state.user.image ? state.user.image : ImgProfile}
                           alt=""
                           style={{
                             width: "50px",

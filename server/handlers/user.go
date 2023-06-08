@@ -7,8 +7,6 @@ import (
 	"dewetour/repositories"
 	"fmt"
 	"net/http"
-	"os"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -16,13 +14,11 @@ import (
 
 type handler struct {
 	UserRepository repositories.UserRepository
-	ProfileRepository     repositories.ProfileRepository
 }
 
-func HandlerUser(UserRepository repositories.UserRepository, ProfileRepository repositories.ProfileRepository) *handler {
+func HandlerUser(UserRepository repositories.UserRepository) *handler {
 	return &handler{
 		UserRepository:        UserRepository,
-		ProfileRepository:     ProfileRepository,
 		// CartRepository:        CartRepository,
 		// TransactionRepository: TransactionRepository,
 	}
@@ -52,7 +48,7 @@ func (h *handler) FindUsers(c *gin.Context) {
 
 func (h *handler) GetUser(c *gin.Context) {
 	userLogin := c.MustGet("userLogin")
-	userId,_ := userLogin.(jwt.MapClaims)["id"].(float64)
+	userId := userLogin.(jwt.MapClaims)["id"].(float64)
 
 	user, err := h.UserRepository.GetUser(int(userId))
 	if err != nil {
@@ -62,58 +58,62 @@ func (h *handler) GetUser(c *gin.Context) {
 	 c.JSON(http.StatusOK, resultdto.SuccessResult{Status: http.StatusOK, Message: "User data successfully obtained", Data: user})
 }
 
-
-func (h *handler) DeleteUser(c *gin.Context) {
+func (h *handler) UpdateUser(c *gin.Context){
+	dataFile := c.MustGet("dataFile").(string)
+		fmt.Println("this is data file", dataFile)
 	userLogin := c.MustGet("userLogin")
-	userId, _ := strconv.Atoi(c.Param("id"))
-	userAdmin := userLogin.(jwt.MapClaims)["is_admin"].(bool)
-	profiles, err := h.ProfileRepository.FindProfiles()
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, resultdto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
-	}
-
-
-	if userAdmin {
-
-		for _, profile := range profiles {
-			if profile.UserID == int(userId) {
-				userProfile, err := h.ProfileRepository.GetProfile(profile.ID)
-				if err != nil {
-					c.JSON(http.StatusBadRequest, resultdto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
-				}
-				fileName := userProfile.Image
-				dirPath := "uploads"
+	userId := userLogin.(jwt.MapClaims)["id"].(float64)
 	
-				filePath := fmt.Sprintf("%s/%s", dirPath,fileName)
-	
-				_, err = h.ProfileRepository.DeleteProfile(userProfile)
-				if err != nil {
-					c.JSON(http.StatusBadRequest, resultdto.ErrorResult{Status: http.StatusBadRequest,Message: err.Error()})
-				}
-				err = os.Remove(filePath)
-				if err != nil {
-					fmt.Println("Failed to delete file"+fileName+":", err)
-					c.JSON(http.StatusInternalServerError, resultdto.ErrorResult{Status: http.StatusInternalServerError,Message: err.Error()})
-				}
-	
-				fmt.Println("File "+ fileName + " deleted successfully")
-			}
+		request := userdto.UpdateUserRequest{
+			Fullname: c.Request.FormValue("fullname"),
+			Email: c.Request.FormValue("email"),
+			Password: c.Request.FormValue("password"),
+			Phone: c.Request.FormValue("phone"),
+			Address: c.Request.FormValue("address"),
+			Image: dataFile,
 		}
-	
-		user, err := h.UserRepository.GetUser(userId)
+		
+		if err := c.Bind(request); err != nil {
+			c.JSON(http.StatusBadRequest, resultdto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
+			return
+		}
+		
+		user, err := h.UserRepository.GetUser(int(userId))
+		fmt.Println(user, "inini tood")
+
 		if err != nil {
 			c.JSON(http.StatusBadRequest, resultdto.ErrorResult{Status: http.StatusBadRequest, Message: err.Error()})
+			return
 		}
-		data, err := h.UserRepository.DeleteUser(user)
+
+		if request.Fullname != "" {
+			user.Fullname = request.Fullname
+		}
+		if request.Email != "" {
+			user.Email = request.Email
+		}
+		if request.Password != "" {
+			user.Password = request.Password
+		}
+		if request.Phone != "" {
+			user.Phone = request.Phone
+		}
+		if request.Address != "" {
+			user.Address = request.Address
+		}
+		if request.Image != "" {
+			user.Image = request.Image
+		}
+
+		data, err := h.UserRepository.UpdateUser(user)
+
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, resultdto.ErrorResult{Status: http.StatusInternalServerError, Message: err.Error()})
+			return
 		}
-		c.JSON(http.StatusOK, resultdto.SuccessResult{Status: http.StatusOK, Message: "User data deleted successfully", Data: convertResponse(data)})
-	} else {
-		c.JSON(http.StatusBadRequest, resultdto.ErrorResult{Status: http.StatusBadRequest, Message: "Sorry, you're not Admin"})
-	}
+		c.JSON(http.StatusOK, resultdto.SuccessResult{Status: http.StatusOK, Message: "data udeh berhasil lu update nyeeet",Data: convertResponse(data)})
 }
+
 
 func  convertResponse(u models.User)  userdto.UserResponse{
 	return userdto.UserResponse{
@@ -122,6 +122,7 @@ func  convertResponse(u models.User)  userdto.UserResponse{
 		Email: u.Email,
 		Phone: u.Phone,
 		Address: u.Address,
+		Image: u.Image,
 	}
 	
 }

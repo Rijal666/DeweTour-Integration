@@ -1,18 +1,25 @@
 /** @format */
 import Navbars from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Button } from "react-bootstrap";
-import { Link, useParams } from "react-router-dom";
+import { Button, Form, NavLink } from "react-bootstrap";
+import { useParams, useNavigate } from "react-router-dom";
 import Carousel from "react-multi-carousel";
 import { API } from "../config/api";
-import ModalForm from "../components/ModalForm";
+import Swal from "sweetalert2";
+
 import "react-multi-carousel/lib/styles.css";
 import { useEffect, useState } from "react";
-import { useQuery } from "react-query";
+import { useQuery, useMutation } from "react-query";
 
-const Detail = ({ setDataTrans }) => {
+const Detail = () => {
   document.title = "Detail | DeweTour";
-
+  const rupiah = (number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+    }).format(number);
+  };
+  const navigate = useNavigate();
   let { id } = useParams();
   // console.log(id);
 
@@ -22,15 +29,20 @@ const Detail = ({ setDataTrans }) => {
   });
 
   const [count, setCount] = useState(1);
-  const [showForm, setShowForm] = useState(false);
+  const [dataTrans, setDataTrans] = useState();
+  const [transaction, setTransaction] = useState({
+    id: 0,
+    name: "",
+    gender: "",
+    phone: "",
+  });
+  const { name, gender, phone } = transaction;
 
-  const handleClose = () => {
-    setShowForm(false);
-  };
-
-  const handleShowForm = () => {
-    handleClose(true);
-    setShowForm(true);
+  const OnChangeHandler = (e) => {
+    setTransaction({
+      ...transaction,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const Add = () => {
@@ -51,6 +63,87 @@ const Detail = ({ setDataTrans }) => {
       pay: Trip?.price * count,
     });
   }, [count]);
+
+  // useEffect(() => {
+  //   //change this to the script source you want to load, for example this is snap.js sandbox env
+  //   const midtransScriptUrl = "https://app.sandbox.midtrans.com/snap/snap.js";
+  //   //change this according to your client-key
+  //   const myMidtransClientKey = process.env.REACT_APP_MIDTRANS_CLIENT_KEY;
+
+  //   let scriptTag = document.createElement("script");
+  //   scriptTag.src = midtransScriptUrl;
+  //   // optional if you want to set script attribute
+  //   // for example snap.js have data-client-key attribute
+  //   scriptTag.setAttribute("data-client-key", myMidtransClientKey);
+
+  //   document.body.appendChild(scriptTag);
+  //   return () => {
+  //     document.body.removeChild(scriptTag);
+  //   };
+  // }, []);
+
+  const handleBuy = useMutation(async (e) => {
+    try {
+      e.preventDefault();
+
+      const config = {
+        headers: {
+          "Content-type": "multipart/form-data",
+        },
+      };
+      // const formData = new FormData();
+      // formData.set("name", transaction.name);
+      // formData.set("gender", transaction.gender);
+      // formData.set("phone", transaction.phone);
+      let data = {
+        name: transaction?.name,
+        gender: transaction?.gender,
+        phone: transaction?.phone,
+        counter_qty: dataTrans?.qty,
+        total: dataTrans?.pay,
+        status: "success",
+        trip_id: Trip?.id,
+      };
+
+      console.log(data, "inininin kokojodad");
+
+      const response = await API.post("/transaction", data, config);
+      navigate("/Profile");
+      Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Add Transaction Success",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      return response.data.data;
+
+      // const token = response.data.data.token;
+      // window.snap.pay(token, {
+      //   onSuccess: function (result) {
+      //     /* You may add your own implementation here */
+      //     console.log(result);
+      //     navigate("/Profile");
+      //   },
+      //   onPending: function (result) {
+      //     /* You may add your own implementation here */
+      //     console.log(result);
+      //     navigate("/Profile");
+      //   },
+      //   onError: function (result) {
+      //     /* You may add your own implementation here */
+      //     console.log(result);
+      //     navigate("/Profile");
+      //   },
+      //   onClose: function () {
+      //     /* You may add your own implementation here */
+      //     alert("you closed the popup without finishing the payment");
+      //   },
+      // });
+    } catch (error) {
+      console.log("transaction failed : ", error);
+    }
+  });
 
   const responsive = {
     superLargeDesktop: {
@@ -144,7 +237,7 @@ const Detail = ({ setDataTrans }) => {
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div className="d-flex gap-2">
             <h2 style={{ color: "#FFAF00", fontWeight: "bold" }}>
-              IDR. {Trip?.price}
+              {rupiah(Trip?.price)}
             </h2>
             <h2 className="fw-bold"> / Person</h2>
           </div>
@@ -169,36 +262,87 @@ const Detail = ({ setDataTrans }) => {
         <div className="d-flex justify-content-between my-5">
           <h2 className="fw-bold">Total :</h2>
           <h2 style={{ color: "#FFAF00", fontWeight: "bold" }}>
-            IDR. {count * Trip?.price}
+            {rupiah(count * Trip?.price)}
           </h2>
         </div>
-        <div className="d-flex justify-content-end gap-5">
-          <Button
-            onClick={handleShowForm}
+
+        <div>
+          <h1 className="text-center mb-5">FORMULIR PEMBELIAN TIKET</h1>
+
+          <div
             style={{
-              backgroundColor: "#FFAF00",
-              fontWeight: "bold",
-              border: "none",
-              padding: "10px 40px",
+              margin: "0 200px",
+              boxShadow: "2px 2px 20px grey",
+              borderRadius: "10px",
             }}
           >
-            ISI FORM
-          </Button>
-          <Link to={`/Payment/${id}`}>
-            <Button
+            <img
+              src="/images/palm.png"
+              alt="#"
+              width="15%"
+              style={{ position: "absolute" }}
+            />
+            <img
+              src="/images/hibiscus.png"
+              alt="#"
+              width="10%"
               style={{
-                backgroundColor: "#FFAF00",
-                fontWeight: "bold",
-                border: "none",
-                padding: "10px 40px",
+                position: "absolute",
+                left: "822px",
+                borderRadius: "6px",
               }}
-            >
-              BOOK NOW
-            </Button>
-          </Link>
+            />
+            <div style={{ padding: " 100px" }}>
+              <Form className="mt-4" onSubmit={(e) => handleBuy.mutate(e)}>
+                <Form.Group
+                  className="mb-3"
+                  controlId="exampleForm.ControlInput1"
+                >
+                  <Form.Label className="fw-bold">Full Name</Form.Label>
+                  <Form.Control
+                    className="p-2 mb-3"
+                    onChange={OnChangeHandler}
+                    name="name"
+                    value={name}
+                    type="text"
+                  />
+                  <Form.Label className="fw-bold">Gender</Form.Label>
+                  <Form.Control
+                    className="p-2 mb-3"
+                    onChange={OnChangeHandler}
+                    name="gender"
+                    value={gender}
+                    type="text"
+                  />
+                  <Form.Label className="fw-bold">Phone</Form.Label>
+
+                  <Form.Control
+                    type="text"
+                    onChange={OnChangeHandler}
+                    name="phone"
+                    value={phone}
+                  />
+                </Form.Group>
+                <div className="d-flex justify-content-center">
+                  <Button
+                    type="submit"
+                    style={{
+                      backgroundColor: "#FFAF00",
+                      fontWeight: "bold",
+                      border: "none",
+                      padding: "10px 40px",
+                      marginBottom: "30px",
+                    }}
+                  >
+                    BOOK NOW
+                  </Button>
+                </div>
+              </Form>
+            </div>
+          </div>
         </div>
       </div>
-      <ModalForm show={showForm} onHide={handleClose} />
+
       <Footer />
     </>
   );

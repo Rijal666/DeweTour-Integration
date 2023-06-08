@@ -1,89 +1,47 @@
 /** @format */
 import Navbars from "../components/Navbar";
-import { Form, Container } from "react-bootstrap";
+import ImgProfile from "../assets/image/myProfile.png";
+
+import { Container, Button } from "react-bootstrap";
 import { useContext } from "react";
-import { useMutation, useQuery } from "react-query";
+import ModalProfile from "../components/ModalProfile";
+import { useQuery } from "react-query";
 import { UserContext } from "../context/userContext";
 import { API } from "../config/api";
 import Footer from "../components/Footer";
-import { useState, useEffect } from "react";
-import Swal from "sweetalert2";
+import { useState } from "react";
 
 function Profile() {
   document.title = "Profile | DeweTour";
 
-  const [state] = useContext(UserContext);
+  const rupiah = (number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+    }).format(number);
+  };
 
-  const [image, setImage] = useState("/images/profile.svg");
-  const [formProfile, setFormProfile] = useState({
-    id: 0,
-    image: "",
-  }); //Store profile data
+  const [state] = useContext(UserContext);
 
   const { data: transactions } = useQuery("transactionCache", async () => {
     const response = await API.get("/transactions");
     return response.data.data;
   });
-  console.log(transactions, "ini jancook");
 
-  // async function getDataUpdateProfile() {
-  //   const responseProfile = await API.get("/profile");
-  //   if (responseProfile.data.data.photo !== "") {
-  //     setImage(responseProfile.data.data.photo);
-  //   }
-  // }
+  const [showProfile, setShowProfile] = useState(false);
 
-  // useEffect(() => {
-  //   getDataUpdateProfile();
-  // }, []);
-
-  const handleChange = (e) => {
-    setFormProfile({
-      ...formProfile,
-      [e.target.name]:
-        e.target.type === "file" ? e.terget.files : e.target.value,
-    });
-
-    // Create image url for preview
-
-    if (e.target.type === "file") {
-      let url = URL.createObjectURL(e.trget.files[0]);
-      setImage(url);
-    }
+  const handleClose = () => {
+    setShowProfile(false);
   };
 
-  const handleSubmit = useMutation(async (e) => {
-    try {
-      e.preventDefault();
-
-      // Configuration
-      const config = {
-        headers: {
-          "Content-type": "multipart/form-data",
-        },
-      };
-
-      // Store data with FormData as object
-      const formData = new FormData();
-      formData.set("image", formProfile?.image[0], formProfile?.image[0]?.name);
-
-      // await disini berfungsi untuk menunggu sampai promise tersebut selesai dan mengembalikkan hasilnya
-      const response = await API.post("/profile", formData, config);
-      console.log(response.data);
-      Swal.fire({
-        position: "center",
-        icon: "success",
-        title: "Add Profile Success",
-        showConfirmButton: false,
-        timer: 1500,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  });
+  const handleShowProfile = () => {
+    handleClose(true);
+    setShowProfile(true);
+  };
 
   return (
     <>
+      <ModalProfile show={showProfile} onHide={handleClose} />
       <Navbars />
       <Container>
         <div>
@@ -150,49 +108,31 @@ function Profile() {
                   <div>
                     <h5 className="fw-bold">{[state.user.address]}</h5>
                     <p style={{ color: "#8A8C90", fontWeight: "bold" }}>
-                      Addres
+                      Address
                     </p>
                   </div>
                 </div>
               </div>
               <div>
-                <div
-                  className="mb-5"
-                  style={{ width: "300px", height: "300px" }}
-                >
-                  <img src={image} alt="" width="100%" />
-                </div>
-                <Form.Group onSubmit={(e) => handleSubmit.mutate(e)}>
-                  <Form.Label
+                <div style={{ width: "300px", height: "350px" }}>
+                  <img
+                    src={state.user.image ? state.user.image : ImgProfile}
+                    alt=""
+                    width="100%"
+                  />
+                  <Button
+                    onClick={handleShowProfile}
+                    className="mt-3"
                     style={{
-                      width: "100%",
+                      padding: "10px 98px",
                       backgroundColor: "#FFAF00",
-                      cursor: "pointer",
+                      border: "none",
                     }}
-                    className="rounded text-center mt-5"
                   >
-                    <div>
-                      <p
-                        className="py-2 mb-0"
-                        style={{
-                          fontSize: "20px",
-                          color: "white",
-                        }}
-                      >
-                        Change Photo Profile
-                      </p>
-                      <div>
-                        <Form.Control
-                          type="file"
-                          name="image"
-                          id="image"
-                          onChange={handleChange}
-                          hidden
-                        />
-                      </div>
-                    </div>
-                  </Form.Label>
-                </Form.Group>
+                    Update Profile
+                  </Button>
+                </div>
+                <div></div>
               </div>
             </div>
           </div>
@@ -305,8 +245,8 @@ function Profile() {
                       </div>
                     </div>
                     <div className="d-flex justify-content-end pe-5">
-                      <h5>Total :</h5>
-                      <h5 style={{ color: "red" }}>{item.total}</h5>
+                      <h5>Total : </h5>
+                      <h5 style={{ color: "red" }}>{rupiah(item.total)}</h5>
                     </div>
                   </div>
                 </div>

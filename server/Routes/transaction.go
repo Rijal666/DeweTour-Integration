@@ -19,4 +19,5 @@ func TransactionRoutes(r *gin.RouterGroup) {
 	r.GET("/transaction", middleware.Auth(h.GetTransaction))
 	r.POST("/transaction", middleware.Auth(h.CreateTransaction))
 	r.DELETE("/transaction/:id", middleware.Auth(h.DeleteTransaction))
+	r.POST("/notification", h.Notification)
 }

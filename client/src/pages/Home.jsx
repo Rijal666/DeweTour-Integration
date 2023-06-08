@@ -21,6 +21,7 @@ function Home() {
     setSearch(e.target.value);
   };
 
+  console.log(trips);
   return (
     <>
       <Navbar />

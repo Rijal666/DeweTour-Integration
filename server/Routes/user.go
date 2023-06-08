@@ -11,10 +11,9 @@ import (
 
 func UserRoutes(r *gin.RouterGroup) {
 	userRepository := repositories.RepositoryUser(mysql.DB)
-	profileRepository := repositories.RepositoryProfile(mysql.DB)
-	h := handlers.HandlerUser(userRepository, profileRepository)
+	h := handlers.HandlerUser(userRepository)
 
 	r.GET("/users", middleware.Auth(h.FindUsers))
 	r.GET("/user", middleware.Auth(h.GetUser))
-	r.DELETE("/user/:id", middleware.Auth(h.DeleteUser))
+	r.PATCH("/user", middleware.Auth(middleware.UploadFile(h.UpdateUser)))
 }

@@ -8,7 +8,7 @@ type User struct {
 	Password    string                `json:"password" gorm:"type: varchar(255)"`
 	Phone       string                `json:"phone" gorm:"type: varchar(255)"`
 	Address     string                `json:"address" gorm:"type: varchar(255)"`
-	Profile     ProfileResponse       `json:"profile"`
+	Image       string                `json:"image" gorm:"type: varchar(255)"`
 	Transaction []TransactionResponse `json:"transaction"`
 }
 

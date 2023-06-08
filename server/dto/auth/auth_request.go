@@ -7,6 +7,7 @@ type AuthRequset struct {
 	Password string `json:"password" validate:"required"`
 	Phone    string `json:"phone" validate:"required"`
 	Address  string `json:"address" validate:"required"`
+	Image    string `json:"image"`
 }
 
 type LoginRequest struct {

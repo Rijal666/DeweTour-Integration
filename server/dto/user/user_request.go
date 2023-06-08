@@ -6,6 +6,7 @@ type CreateUserRequest struct {
 	Password string `json:"password" form:"password" validate:"required"`
 	Phone    string `json:"phone" form:"phone" validate:"required"`
 	Address  string `json:"address" form:"address" validate:"required"`
+	Image    string `json:"image" form:"address"`
 }
 
 type UpdateUserRequest struct {
@@ -15,4 +16,5 @@ type UpdateUserRequest struct {
 	Password string `json:"password"`
 	Phone    string `json:"phone"`
 	Address  string `json:"address"`
+	Image    string `json:"image" `
 }
